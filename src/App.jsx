@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { LangProvider, useLang, useUI } from './i18n.jsx'
 import { CHAPTERS, findChapter } from './data/curriculum.js'
 import { LEVELS, LEVEL_BY_ID, levelOf } from './data/levels.js'
+import { loadDone, saveDone, doneInChapter, totalInChapter } from './data/progress.js'
 import LangToggle from './components/LangToggle.jsx'
 import SpeakButton from './components/SpeakButton.jsx'
 import ActivityModal from './components/ActivityModal.jsx'
@@ -24,7 +25,7 @@ function Header({ onHome }) {
   )
 }
 
-function Home({ onOpenChapter }) {
+function Home({ onOpenChapter, done }) {
   const { t } = useLang()
   const ui = useUI()
   return (
@@ -33,27 +34,37 @@ function Home({ onOpenChapter }) {
         {ui('chapters')} 📚
       </h1>
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {CHAPTERS.map((ch, i) => (
-          <button
-            key={ch.id}
-            onClick={() => { sfx.tap(); onOpenChapter(ch.id) }}
-            className="group flex flex-col items-start gap-3 rounded-3xl bg-white p-6 text-left shadow-lg ring-2 ring-transparent transition hover:-translate-y-1 hover:shadow-xl active:scale-95"
-          >
-            <div
-              className="flex h-16 w-16 items-center justify-center rounded-2xl text-4xl shadow-inner"
-              style={{ backgroundColor: ch.color + '22' }}
+        {CHAPTERS.map((ch, i) => {
+          const total = totalInChapter(ch)
+          const d = doneInChapter(done, ch.id)
+          const complete = d >= total
+          return (
+            <button
+              key={ch.id}
+              onClick={() => { sfx.tap(); onOpenChapter(ch.id) }}
+              className="group flex flex-col items-start gap-3 rounded-3xl bg-white p-6 text-left shadow-lg ring-2 ring-transparent transition hover:-translate-y-1 hover:shadow-xl active:scale-95"
             >
-              {ch.emoji}
-            </div>
-            <div className="text-xs font-bold uppercase tracking-wide" style={{ color: ch.color }}>
-              {ui('chapter')} {i + 1} · {ch.tool}
-            </div>
-            <div className="text-xl font-extrabold text-stone-800">{t(ch.title)}</div>
-            <div className="text-sm text-stone-400">
-              {ch.sessions.length} {ui('sessions')}
-            </div>
-          </button>
-        ))}
+              <div className="flex w-full items-center justify-between">
+                <div
+                  className="flex h-16 w-16 items-center justify-center rounded-2xl text-4xl shadow-inner"
+                  style={{ backgroundColor: ch.color + '22' }}
+                >
+                  {ch.emoji}
+                </div>
+                <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${complete ? 'bg-green-100 text-green-700' : 'bg-stone-100 text-stone-500'}`}>
+                  {complete ? '✓ ' : ''}{d}/{total}
+                </span>
+              </div>
+              <div className="text-xs font-bold uppercase tracking-wide" style={{ color: ch.color }}>
+                {ui('chapter')} {i + 1} · {ch.tool}
+              </div>
+              <div className="text-xl font-extrabold text-stone-800">{t(ch.title)}</div>
+              <div className="text-sm text-stone-400">
+                {ch.sessions.length} {ui('sessions')}
+              </div>
+            </button>
+          )
+        })}
       </div>
     </main>
   )
@@ -101,7 +112,7 @@ function LevelFilter({ value, onChange }) {
   )
 }
 
-function ChapterView({ chapterId, onOpenActivity }) {
+function ChapterView({ chapterId, onOpenActivity, done, markDone, onClearProgress }) {
   const { t } = useLang()
   const ui = useUI()
   const ch = findChapter(chapterId)
@@ -110,6 +121,8 @@ function ChapterView({ chapterId, onOpenActivity }) {
 
   // niveaux à afficher selon le filtre
   const shownLevels = level === 'all' ? LEVELS.map((l) => l.id) : [level]
+  const total = totalInChapter(ch)
+  const d = doneInChapter(done, ch.id)
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-8 sm:px-8">
@@ -120,11 +133,21 @@ function ChapterView({ chapterId, onOpenActivity }) {
         >
           {ch.emoji}
         </div>
-        <div>
+        <div className="flex-1">
           <div className="text-xs font-bold uppercase tracking-wide" style={{ color: ch.color }}>
             {ch.tool}
           </div>
           <h1 className="text-2xl font-extrabold text-stone-800">{t(ch.title)}</h1>
+        </div>
+        <div className="flex flex-col items-end gap-1">
+          <span className={`rounded-full px-3 py-1 text-sm font-bold ${d >= total ? 'bg-green-100 text-green-700' : 'bg-stone-100 text-stone-500'}`}>
+            {d >= total ? '✓ ' : ''}{d}/{total}
+          </span>
+          {d > 0 && (
+            <button onClick={onClearProgress} className="text-xs font-bold text-stone-400 underline transition hover:text-rose-500">
+              ↺ {t({ fr: 'remettre à zéro', en: 'reset' })}
+            </button>
+          )}
         </div>
       </div>
 
@@ -182,20 +205,25 @@ function ChapterView({ chapterId, onOpenActivity }) {
                       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         {acts.map((a) => {
                           const playable = a.type !== 'info'
+                          const key = `${s.id}:${a.id}`
+                          const isDone = done.has(key)
                           return (
                             <div
                               key={a.id}
-                              className={`flex items-center gap-3 rounded-2xl border-2 border-stone-100 bg-stone-50 p-3 transition hover:bg-violet-50`}
+                              className={`flex items-center gap-3 rounded-2xl border-2 p-3 transition hover:bg-violet-50 ${isDone ? 'border-green-200 bg-green-50' : 'border-stone-100 bg-stone-50'}`}
                             >
                               <button
-                                onClick={() => { sfx.tap(); onOpenActivity(a) }}
+                                onClick={() => { sfx.tap(); markDone(key); onOpenActivity(a) }}
                                 className="flex flex-1 items-center gap-3 text-left active:scale-95"
                               >
-                                <span className="text-3xl">{a.emoji}</span>
+                                <span className="relative text-3xl">
+                                  {a.emoji}
+                                  {isDone && <span className="absolute -bottom-1 -right-1 text-sm">✅</span>}
+                                </span>
                                 <span className="flex-1">
                                   <span className="block font-bold text-stone-800">{t(a.title)}</span>
-                                  <span className={`text-xs font-bold ${playable ? 'text-green-600' : 'text-stone-400'}`}>
-                                    {playable ? `▶ ${ui('play')}` : `👀 ${t({ fr: 'À découvrir', en: 'Discover' })}`}
+                                  <span className={`text-xs font-bold ${isDone ? 'text-green-600' : playable ? 'text-green-600' : 'text-stone-400'}`}>
+                                    {isDone ? `✓ ${t({ fr: 'fait', en: 'done' })}` : playable ? `▶ ${ui('play')}` : `👀 ${t({ fr: 'À découvrir', en: 'Discover' })}`}
                                   </span>
                                 </span>
                               </button>
@@ -220,6 +248,22 @@ function Shell() {
   const ui = useUI()
   const [chapterId, setChapterId] = useState(null)
   const [activity, setActivity] = useState(null)
+  const [done, setDone] = useState(() => loadDone())
+
+  function markDone(key) {
+    setDone((prev) => {
+      if (prev.has(key)) return prev
+      const next = new Set(prev)
+      next.add(key)
+      saveDone(next)
+      return next
+    })
+  }
+  function clearProgress() {
+    const next = new Set()
+    saveDone(next)
+    setDone(next)
+  }
 
   return (
     <div className="min-h-full pb-16">
@@ -237,9 +281,9 @@ function Shell() {
       )}
 
       {chapterId ? (
-        <ChapterView chapterId={chapterId} onOpenActivity={setActivity} />
+        <ChapterView chapterId={chapterId} onOpenActivity={setActivity} done={done} markDone={markDone} onClearProgress={clearProgress} />
       ) : (
-        <Home onOpenChapter={setChapterId} />
+        <Home onOpenChapter={setChapterId} done={done} />
       )}
 
       {activity && <ActivityModal activity={activity} onClose={() => setActivity(null)} />}

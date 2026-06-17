@@ -6,7 +6,7 @@ const LangContext = createContext(null)
 // propres {fr,en}). Ajoute une clé ici quand tu ajoutes du texte d'UI.
 export const UI = {
   appTitle: { fr: 'Numérique au Carmel', en: 'Digital at Carmel' },
-  appSubtitle: { fr: 'Maternelle · 4–5 ans', en: 'Kindergarten · ages 4–5' },
+  appSubtitle: { fr: 'Maternelle · 3–5 ans', en: 'Kindergarten · ages 3–5' },
   chapters: { fr: 'Chapitres', en: 'Chapters' },
   chapter: { fr: 'Chapitre', en: 'Chapter' },
   session: { fr: 'Séance', en: 'Session' },

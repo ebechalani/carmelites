@@ -117,22 +117,26 @@ function ChapterView({ chapterId, onOpenActivity }) {
               {s.activities.map((a) => {
                 const playable = a.type !== 'info'
                 return (
-                  <button
+                  <div
                     key={a.id}
-                    onClick={() => { sfx.tap(); onOpenActivity(a) }}
-                    className="flex items-center gap-3 rounded-2xl border-2 border-stone-100 bg-stone-50 p-3 text-left transition hover:border-violet-200 hover:bg-violet-50 active:scale-95"
+                    className="flex items-center gap-3 rounded-2xl border-2 border-stone-100 bg-stone-50 p-3 transition hover:border-violet-200 hover:bg-violet-50"
                   >
-                    <span className="text-3xl">{a.emoji}</span>
-                    <span className="flex-1">
-                      <span className="block font-bold text-stone-800">{t(a.title)}</span>
-                      <span
-                        className={`text-xs font-bold ${playable ? 'text-green-600' : 'text-stone-400'}`}
-                      >
-                        {playable ? `▶ ${ui('play')}` : `👀 ${t({ fr: 'À découvrir', en: 'Discover' })}`}
+                    <button
+                      onClick={() => { sfx.tap(); onOpenActivity(a) }}
+                      className="flex flex-1 items-center gap-3 text-left active:scale-95"
+                    >
+                      <span className="text-3xl">{a.emoji}</span>
+                      <span className="flex-1">
+                        <span className="block font-bold text-stone-800">{t(a.title)}</span>
+                        <span
+                          className={`text-xs font-bold ${playable ? 'text-green-600' : 'text-stone-400'}`}
+                        >
+                          {playable ? `▶ ${ui('play')}` : `👀 ${t({ fr: 'À découvrir', en: 'Discover' })}`}
+                        </span>
                       </span>
-                    </span>
+                    </button>
                     <SpeakButton text={`${t(a.title)}. ${t(a.desc)}`} className="h-10 w-10 text-xl" />
-                  </button>
+                  </div>
                 )
               })}
             </div>

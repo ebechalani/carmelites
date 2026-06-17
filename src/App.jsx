@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { LangProvider, useLang, useUI } from './i18n.jsx'
 import { CHAPTERS, findChapter } from './data/curriculum.js'
+import { LEVELS, LEVEL_BY_ID, levelOf } from './data/levels.js'
 import LangToggle from './components/LangToggle.jsx'
 import SpeakButton from './components/SpeakButton.jsx'
 import ActivityModal from './components/ActivityModal.jsx'
@@ -58,11 +59,57 @@ function Home({ onOpenChapter }) {
   )
 }
 
+// Petite pastille de niveau (👶 3 ans / 🧒 Débutant / 🧑 Grand).
+function LevelBadge({ id }) {
+  const { t } = useLang()
+  const l = LEVEL_BY_ID[id]
+  if (!l) return null
+  return (
+    <span className={`rounded-full ${l.soft} ${l.text} px-2 py-0.5 text-[11px] font-bold`}>
+      {l.emoji} {t(l.label)}
+    </span>
+  )
+}
+
+// Filtre par niveau, en haut du chapitre.
+function LevelFilter({ value, onChange }) {
+  const { t } = useLang()
+  const Btn = ({ id, emoji, label }) => {
+    const active = value === id
+    const l = id !== 'all' ? LEVEL_BY_ID[id] : null
+    return (
+      <button
+        onClick={() => onChange(id)}
+        className={`rounded-full px-4 py-2 text-sm font-bold shadow-sm ring-2 transition active:scale-95 ${
+          active
+            ? l ? `${l.soft} ${l.text} ${l.ring}` : 'bg-violet-100 text-violet-700 ring-violet-300'
+            : 'bg-white text-stone-500 ring-stone-200 hover:bg-stone-50'
+        }`}
+      >
+        {emoji} {label}
+      </button>
+    )
+  }
+  return (
+    <div className="mb-6 flex flex-wrap items-center gap-2">
+      <span className="mr-1 text-sm font-bold text-stone-500">{t({ fr: 'Niveau :', en: 'Level:' })}</span>
+      <Btn id="all" emoji="🌈" label={t({ fr: 'Tous', en: 'All' })} />
+      {LEVELS.map((l) => (
+        <Btn key={l.id} id={l.id} emoji={l.emoji} label={t(l.label)} />
+      ))}
+    </div>
+  )
+}
+
 function ChapterView({ chapterId, onOpenActivity }) {
   const { t } = useLang()
   const ui = useUI()
   const ch = findChapter(chapterId)
   const [teacherFor, setTeacherFor] = useState(null)
+  const [level, setLevel] = useState('all')
+
+  // niveaux à afficher selon le filtre
+  const shownLevels = level === 'all' ? LEVELS.map((l) => l.id) : [level]
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-8 sm:px-8">
@@ -81,72 +128,89 @@ function ChapterView({ chapterId, onOpenActivity }) {
         </div>
       </div>
 
+      <LevelFilter value={level} onChange={setLevel} />
+
       <div className="flex flex-col gap-6">
-        {ch.sessions.map((s, i) => (
-          <section key={s.id} className="rounded-3xl bg-white p-5 shadow-md sm:p-6">
-            <div className="mb-3 flex items-center gap-2">
-              <span
-                className="flex h-9 w-9 items-center justify-center rounded-full text-base font-extrabold text-white"
-                style={{ backgroundColor: ch.color }}
-              >
-                {i + 1}
-              </span>
-              <h2 className="flex-1 text-xl font-extrabold text-stone-800">{t(s.title)}</h2>
-              <button
-                onClick={() => setTeacherFor(teacherFor === s.id ? null : s.id)}
-                className="rounded-full bg-stone-100 px-3 py-1.5 text-sm font-bold text-stone-600 transition hover:bg-stone-200 active:scale-95"
-              >
-                👩‍🏫 {ui('teacherView')}
-              </button>
-            </div>
+        {ch.sessions.map((s, i) => {
+          // activités groupées par niveau, dans l'ordre 3 ans → débutant → grand
+          const groups = shownLevels
+            .map((lvl) => ({ lvl, acts: s.activities.filter((a) => levelOf(a) === lvl) }))
+            .filter((g) => g.acts.length > 0)
+          if (groups.length === 0) return null // séance vide pour ce filtre
 
-            {teacherFor === s.id && (
-              <div className="mb-4 rounded-2xl bg-amber-50 p-4 ring-2 ring-amber-200">
-                <div className="mb-1 text-sm font-bold uppercase tracking-wide text-amber-700">
-                  {ui('objectives')}
-                </div>
-                <ul className="list-disc space-y-1 pl-5 text-stone-700">
-                  {t(s.objectives).map((o, k) => (
-                    <li key={k}>{o}</li>
-                  ))}
-                </ul>
+          return (
+            <section key={s.id} className="rounded-3xl bg-white p-5 shadow-md sm:p-6">
+              <div className="mb-3 flex items-center gap-2">
+                <span
+                  className="flex h-9 w-9 items-center justify-center rounded-full text-base font-extrabold text-white"
+                  style={{ backgroundColor: ch.color }}
+                >
+                  {i + 1}
+                </span>
+                <h2 className="flex-1 text-xl font-extrabold text-stone-800">{t(s.title)}</h2>
+                <button
+                  onClick={() => setTeacherFor(teacherFor === s.id ? null : s.id)}
+                  className="rounded-full bg-stone-100 px-3 py-1.5 text-sm font-bold text-stone-600 transition hover:bg-stone-200 active:scale-95"
+                >
+                  👩‍🏫 {ui('teacherView')}
+                </button>
               </div>
-            )}
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {s.activities.map((a) => {
-                const playable = a.type !== 'info'
-                return (
-                  <div
-                    key={a.id}
-                    className="flex items-center gap-3 rounded-2xl border-2 border-stone-100 bg-stone-50 p-3 transition hover:border-violet-200 hover:bg-violet-50"
-                  >
-                    <button
-                      onClick={() => { sfx.tap(); onOpenActivity(a) }}
-                      className="flex flex-1 items-center gap-3 text-left active:scale-95"
-                    >
-                      <span className="text-3xl">{a.emoji}</span>
-                      <span className="flex-1">
-                        <span className="flex items-center gap-2">
-                          <span className="font-bold text-stone-800">{t(a.title)}</span>
-                          {a.age === 3 && (
-                            <span className="rounded-full bg-pink-100 px-2 py-0.5 text-[11px] font-bold text-pink-600">👶 3 {t({ fr: 'ans', en: 'yo' })}</span>
-                          )}
-                        </span>
-                        <span
-                          className={`text-xs font-bold ${playable ? 'text-green-600' : 'text-stone-400'}`}
-                        >
-                          {playable ? `▶ ${ui('play')}` : `👀 ${t({ fr: 'À découvrir', en: 'Discover' })}`}
-                        </span>
-                      </span>
-                    </button>
-                    <SpeakButton text={`${t(a.title)}. ${t(a.desc)}`} className="h-10 w-10 text-xl" />
+              {teacherFor === s.id && (
+                <div className="mb-4 rounded-2xl bg-amber-50 p-4 ring-2 ring-amber-200">
+                  <div className="mb-1 text-sm font-bold uppercase tracking-wide text-amber-700">
+                    {ui('objectives')}
                   </div>
-                )
-              })}
-            </div>
-          </section>
-        ))}
+                  <ul className="list-disc space-y-1 pl-5 text-stone-700">
+                    {t(s.objectives).map((o, k) => (
+                      <li key={k}>{o}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* un bloc par niveau présent dans la séance */}
+              <div className="flex flex-col gap-4">
+                {groups.map(({ lvl, acts }) => {
+                  const l = LEVEL_BY_ID[lvl]
+                  return (
+                    <div key={lvl}>
+                      <div className="mb-2 flex items-center gap-2">
+                        <span className="h-0.5 w-4 rounded" style={{ backgroundColor: l.color }} />
+                        <LevelBadge id={lvl} />
+                      </div>
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        {acts.map((a) => {
+                          const playable = a.type !== 'info'
+                          return (
+                            <div
+                              key={a.id}
+                              className={`flex items-center gap-3 rounded-2xl border-2 border-stone-100 bg-stone-50 p-3 transition hover:bg-violet-50`}
+                            >
+                              <button
+                                onClick={() => { sfx.tap(); onOpenActivity(a) }}
+                                className="flex flex-1 items-center gap-3 text-left active:scale-95"
+                              >
+                                <span className="text-3xl">{a.emoji}</span>
+                                <span className="flex-1">
+                                  <span className="block font-bold text-stone-800">{t(a.title)}</span>
+                                  <span className={`text-xs font-bold ${playable ? 'text-green-600' : 'text-stone-400'}`}>
+                                    {playable ? `▶ ${ui('play')}` : `👀 ${t({ fr: 'À découvrir', en: 'Discover' })}`}
+                                  </span>
+                                </span>
+                              </button>
+                              <SpeakButton text={`${t(a.title)}. ${t(a.desc)}`} className="h-10 w-10 text-xl" />
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </section>
+          )
+        })}
       </div>
     </main>
   )

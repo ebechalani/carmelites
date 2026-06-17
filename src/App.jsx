@@ -305,7 +305,6 @@ function Shell() {
       )}
 
       <footer className="mt-10 px-4 pb-6 text-center text-xs text-stone-400">
-        <div className="font-bold text-stone-500">Linfopourtous</div>
         <div>© {new Date().getFullYear()} · {ui('siteBy')} <span className="font-bold text-violet-500">Eddy Bachaalany</span></div>
       </footer>
     </div>

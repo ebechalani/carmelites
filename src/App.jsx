@@ -7,6 +7,7 @@ import LangToggle from './components/LangToggle.jsx'
 import MuteToggle from './components/MuteToggle.jsx'
 import SpeakButton from './components/SpeakButton.jsx'
 import ActivityModal from './components/ActivityModal.jsx'
+import Celebration from './components/Celebration.jsx'
 import { sfx } from './sound.js'
 
 function Header({ onHome }) {
@@ -248,18 +249,24 @@ function ChapterView({ chapterId, onOpenActivity, done, markDone, onClearProgres
 
 function Shell() {
   const ui = useUI()
+  const { t } = useLang()
   const [chapterId, setChapterId] = useState(null)
   const [activity, setActivity] = useState(null)
   const [done, setDone] = useState(() => loadDone())
+  const [celebrate, setCelebrate] = useState(null) // chapitre qui vient d'être fini
 
   function markDone(key) {
-    setDone((prev) => {
-      if (prev.has(key)) return prev
-      const next = new Set(prev)
-      next.add(key)
-      saveDone(next)
-      return next
-    })
+    if (done.has(key)) return
+    const next = new Set(done)
+    next.add(key)
+    saveDone(next)
+    setDone(next)
+    // fête si le chapitre vient d'atteindre 100 %
+    const chId = key.split('-')[0] // "ch1-s1:a" → "ch1"
+    const chapter = findChapter(chId)
+    if (chapter && doneInChapter(next, chId) === totalInChapter(chapter)) {
+      setCelebrate(chapter)
+    }
   }
   function clearProgress() {
     const next = new Set()
@@ -289,6 +296,13 @@ function Shell() {
       )}
 
       {activity && <ActivityModal activity={activity} onClose={() => setActivity(null)} />}
+
+      {celebrate && (
+        <Celebration
+          title={`${t({ fr: 'Chapitre terminé !', en: 'Chapter complete!' })} ${t(celebrate.title)}`}
+          onDone={() => setCelebrate(null)}
+        />
+      )}
 
       <footer className="mt-10 px-4 pb-6 text-center text-xs text-stone-400">
         <div className="font-bold text-stone-500">Numérique au Carmel</div>

@@ -4,6 +4,7 @@ import { CHAPTERS, findChapter } from './data/curriculum.js'
 import { LEVELS, LEVEL_BY_ID, levelOf } from './data/levels.js'
 import { loadDone, saveDone, doneInChapter, totalInChapter } from './data/progress.js'
 import LangToggle from './components/LangToggle.jsx'
+import MuteToggle from './components/MuteToggle.jsx'
 import SpeakButton from './components/SpeakButton.jsx'
 import ActivityModal from './components/ActivityModal.jsx'
 import { sfx } from './sound.js'
@@ -20,6 +21,7 @@ function Header({ onHome }) {
         </div>
       </button>
       <div className="flex-1" />
+      <MuteToggle />
       <LangToggle />
     </header>
   )
@@ -287,6 +289,11 @@ function Shell() {
       )}
 
       {activity && <ActivityModal activity={activity} onClose={() => setActivity(null)} />}
+
+      <footer className="mt-10 px-4 pb-6 text-center text-xs text-stone-400">
+        <div className="font-bold text-stone-500">Numérique au Carmel</div>
+        <div>© {new Date().getFullYear()} · {ui('siteBy')} <span className="font-bold text-violet-500">Eddy Bachaalany</span></div>
+      </footer>
     </div>
   )
 }

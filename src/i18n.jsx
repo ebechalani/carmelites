@@ -27,6 +27,7 @@ export const UI = {
   tryAgain: { fr: 'Essaie encore !', en: 'Try again!' },
   buildProgram: { fr: 'Range les flèches puis appuie sur Go', en: 'Line up the arrows then press Go' },
   level: { fr: 'Niveau', en: 'Level' },
+  siteBy: { fr: 'Site créé par', en: 'Site by' },
 }
 
 export function LangProvider({ children }) {

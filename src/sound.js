@@ -1,6 +1,16 @@
 // Sons et voix — pensés pour des non-lecteurs.
 // Aucune dépendance : Web Audio pour les bips, SpeechSynthesis pour la voix.
 
+// Coupe-son global (mémorisé), pour la classe. sfx + speak le respectent.
+let muted = false
+try { muted = localStorage.getItem('carmel-muted') === '1' } catch { /* ignore */ }
+export function isMuted() { return muted }
+export function setMuted(v) {
+  muted = !!v
+  try { localStorage.setItem('carmel-muted', muted ? '1' : '0') } catch { /* ignore */ }
+  if (muted && typeof window !== 'undefined' && window.speechSynthesis) window.speechSynthesis.cancel()
+}
+
 let audioCtx = null
 function ctx() {
   if (typeof window === 'undefined') return null
@@ -12,6 +22,7 @@ function ctx() {
 }
 
 function tone(freq, start, duration, type = 'sine', gain = 0.15) {
+  if (muted) return
   const ac = ctx()
   if (!ac) return
   const osc = ac.createOscillator()
@@ -67,6 +78,7 @@ function pickVoice(lang) {
 
 // Lit un texte à voix haute dans la bonne langue. Utilisé par le bouton 🔊.
 export function speak(text, lang = 'fr') {
+  if (muted) return
   if (typeof window === 'undefined' || !window.speechSynthesis) return
   try {
     window.speechSynthesis.cancel()

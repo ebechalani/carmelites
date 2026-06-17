@@ -1,4 +1,4 @@
-// Programme Numérique - Maternelle (G0 / KG), d'après les manuels 2023.
+﻿// Programme Numérique - Maternelle (G0 / KG), d'après les manuels 2023.
 // Chaque activité a un `type` qui décide du composant interactif :
 //   'info'      -> carte d'information (parties de l'ordi, l'ordi partout…)
 //   'dog-grid'  -> jeu d'algorithme directionnel (le chien / le bonhomme) — JOUABLE
@@ -26,6 +26,8 @@ export const CHAPTERS = [
           en: ['Discover the main parts of a computer', 'Discover the GCompris program', 'Master the use of the mouse'],
         },
         activities: [
+          { id: 'tot', type: 'tiny', variant: 'pop', age: 3, emoji: '🐥', title: { fr: 'Touche les animaux', en: 'Tap the animals' },
+            desc: { fr: 'Touche les animaux qui apparaissent à l’écran.', en: 'Tap the animals that appear on screen.' } },
           { id: 'a', type: 'info', emoji: '🖥️', title: { fr: 'Souris, écran, clavier…', en: 'Mouse, screen, keyboard…' },
             desc: { fr: 'On montre et on nomme chaque partie de l’ordinateur.', en: 'Show and name each part of the computer.' } },
           { id: 'b', type: 'mouse', variant: 'duck', emoji: '🦆', title: { fr: 'Le bébé souris (le canard)', en: 'Baby mouse (the duck)' },
@@ -124,8 +126,11 @@ export const CHAPTERS = [
     sessions: [
       { id: 'ch2-s1', title: { fr: 'Dessiner les chiffres', en: 'Drawing numbers' },
         objectives: { fr: ['Tracer les chiffres 1, 2, 3, 4 avec des formes'], en: ['Draw the numbers 1, 2, 3, 4 with shapes'] },
-        activities: [{ id: 'a', type: 'paint', emoji: '🔢', title: { fr: 'Les chiffres 1-2-3-4', en: 'Numbers 1-2-3-4' },
-          desc: { fr: 'Reproduis les chiffres dans Paint avec des formes.', en: 'Reproduce the numbers in Paint with shapes.' } }] },
+        activities: [
+          { id: 'tot', type: 'tiny', variant: 'stamp', age: 3, emoji: '⭐', title: { fr: 'Tampons rigolos', en: 'Funny stamps' },
+            desc: { fr: 'Touche partout pour poser des tampons.', en: 'Tap anywhere to drop stamps.' } },
+          { id: 'a', type: 'paint', emoji: '🔢', title: { fr: 'Les chiffres 1-2-3-4', en: 'Numbers 1-2-3-4' },
+            desc: { fr: 'Reproduis les chiffres dans Paint avec des formes.', en: 'Reproduce the numbers in Paint with shapes.' } }] },
       { id: 'ch2-s2', title: { fr: 'Dessiner les lettres', en: 'Drawing letters' },
         objectives: { fr: ['Tracer les lettres L, P, C, B'], en: ['Draw the letters L, P, C, B'] },
         activities: [{ id: 'a', type: 'paint', emoji: '🔤', title: { fr: 'Les lettres L-P-C-B', en: 'Letters L-P-C-B' },
@@ -160,6 +165,8 @@ export const CHAPTERS = [
         objectives: { fr: ['Reconnaître les parties de l’ordinateur', 'Repérer les touches du clavier', 'Taper les lettres simples'],
           en: ['Identify the parts of the computer', 'Find the keyboard keys', 'Type simple letters'] },
         activities: [
+          { id: 'tot', type: 'tiny', variant: 'keys', age: 3, emoji: '🎹', title: { fr: 'Le piano des animaux', en: 'Animal piano' },
+            desc: { fr: 'Touche une touche pour voir et entendre un animal.', en: 'Tap a key to see and hear an animal.' } },
           { id: 'a', type: 'keyboard', variant: 'letter-fall', emoji: '🅰️', title: { fr: 'Lettres simples', en: 'Simple letters' },
             desc: { fr: 'Tape la lettre avant qu’elle ne touche le sol.', en: 'Type the letter before it hits the ground.' } },
           { id: 'b', type: 'dog-grid', emoji: '🐶', title: { fr: 'Le chien et son repas', en: 'Move the dog to the food' },
@@ -212,8 +219,11 @@ export const CHAPTERS = [
       { id: 'ch4-s1', title: { fr: 'Le pinceau et le soleil', en: 'Brush and the sun' },
         objectives: { fr: ['Découvrir l’écran d’accueil de Paint', 'Dessiner un soleil au pinceau'],
           en: ['Discover the Paint welcome screen', 'Draw a sun with the brush'] },
-        activities: [{ id: 'a', type: 'paint', emoji: '☀️', title: { fr: 'Dessine le soleil', en: 'Draw the sun' },
-          desc: { fr: 'Choisis une couleur et dessine le soleil au pinceau.', en: 'Pick a colour and draw the sun with the brush.' } }] },
+        activities: [
+          { id: 'tot', type: 'tiny', variant: 'scribble', age: 3, emoji: '🌈', title: { fr: 'Le doigt magique', en: 'Magic finger' },
+            desc: { fr: 'Glisse ton doigt pour dessiner en arc-en-ciel.', en: 'Slide your finger to draw in rainbow colours.' } },
+          { id: 'a', type: 'paint', emoji: '☀️', title: { fr: 'Dessine le soleil', en: 'Draw the sun' },
+            desc: { fr: 'Choisis une couleur et dessine le soleil au pinceau.', en: 'Pick a colour and draw the sun with the brush.' } }] },
       { id: 'ch4-s2', title: { fr: 'Les formes et la maison', en: 'Shapes and the house' },
         objectives: { fr: ['Découvrir les formes de Paint', 'Dessiner des formes colorées', 'Dessiner une maison'],
           en: ['Discover Paint shapes', 'Draw coloured shapes', 'Draw a house'] },
@@ -254,6 +264,8 @@ export const CHAPTERS = [
         objectives: { fr: ['Reconnaître les flèches de direction', 'Déplacer le chien pas à pas', 'Suivre un chemin avec les empreintes'],
           en: ['Recognise the direction arrows', 'Move the dog step by step', 'Follow a path with footprints'] },
         activities: [
+          { id: 'tot', type: 'tiny', variant: 'tapwalk', age: 3, emoji: '🐾', title: { fr: 'Avance le chien', en: 'Walk the dog' },
+            desc: { fr: 'Touche le bouton pour faire avancer le chien vers l’os.', en: 'Tap the button to move the dog to the bone.' } },
           { id: 'a', type: 'arrow-pick', emoji: '❓', title: { fr: 'Quelle flèche ?', en: 'Which arrow?' },
             desc: { fr: 'Touche la flèche qui emmène le chien à l’os.', en: 'Tap the arrow that takes the dog to the bone.' } },
           { id: 'b', type: 'dog-grid', emoji: '🐾', title: { fr: 'Promène le chien', en: 'Walk the dog' },
@@ -312,6 +324,8 @@ export const CHAPTERS = [
         objectives: { fr: ['Découvrir l’écran d’accueil de ScratchJr', 'Faire avancer Tic'],
           en: ['Discover the ScratchJr welcome screen', 'Make Tic move'] },
         activities: [
+          { id: 'tot', type: 'tiny', variant: 'dance', age: 3, emoji: '💃', title: { fr: 'Fais danser le chat', en: 'Make the cat dance' },
+            desc: { fr: 'Touche un bouton pour faire sauter ou tourner le chat.', en: 'Tap a button to make the cat jump or spin.' }, tiny: { hero: '🐱' } },
           { id: 'a', type: 'scratch', emoji: '🐱', title: { fr: 'Tic avance de 5 pas', en: 'Tic walks 5 steps' },
             desc: { fr: 'Assemble les blocs pour faire avancer Tic.', en: 'Assemble the blocks to make Tic walk.' }, sc: { hero: '🐱' } },
         ] },
@@ -352,3 +366,4 @@ export const CHAPTERS = [
 export function findChapter(id) {
   return CHAPTERS.find((c) => c.id === id)
 }
+

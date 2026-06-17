@@ -127,7 +127,12 @@ function ChapterView({ chapterId, onOpenActivity }) {
                     >
                       <span className="text-3xl">{a.emoji}</span>
                       <span className="flex-1">
-                        <span className="block font-bold text-stone-800">{t(a.title)}</span>
+                        <span className="flex items-center gap-2">
+                          <span className="font-bold text-stone-800">{t(a.title)}</span>
+                          {a.age === 3 && (
+                            <span className="rounded-full bg-pink-100 px-2 py-0.5 text-[11px] font-bold text-pink-600">👶 3 {t({ fr: 'ans', en: 'yo' })}</span>
+                          )}
+                        </span>
                         <span
                           className={`text-xs font-bold ${playable ? 'text-green-600' : 'text-stone-400'}`}
                         >

@@ -55,6 +55,7 @@ export default function DogGrid({ config = {} }) {
   const [running, setRunning] = useState(false)
   const [status, setStatus] = useState('idle') // idle | win | fail
   const timer = useRef(null)
+  const posRef = useRef(level.start) // suit la position pour les appuis rapides (mode direct)
 
   useEffect(() => {
     reset()
@@ -64,6 +65,7 @@ export default function DogGrid({ config = {} }) {
 
   function reset() {
     clearInterval(timer.current)
+    posRef.current = level.start
     setProgram([])
     setPos(level.start)
     setRunning(false)
@@ -74,11 +76,14 @@ export default function DogGrid({ config = {} }) {
   const inGrid = (r, c) => r >= 0 && c >= 0 && r < level.rows && c < level.cols
 
   // ── Mode direct : on bouge tout de suite ───────────────────────────────────
+  // posRef évite la fermeture obsolète si l'enfant appuie vite (comme mTiny).
   function step(key) {
     if (status === 'win') return
     const m = MOVES[key]
-    const next = [pos[0] + m.dr, pos[1] + m.dc]
+    const p = posRef.current
+    const next = [p[0] + m.dr, p[1] + m.dc]
     if (!inGrid(next[0], next[1]) || isWall(next[0], next[1])) { sfx.fail(); return }
+    posRef.current = next
     sfx.step()
     setPos(next)
     if (same(next, level.goal)) { setStatus('win'); sfx.win(); speak(t({ fr: 'Bravo !', en: 'Well done!' }), lang) }
